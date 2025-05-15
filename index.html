@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주간 학식 식단표</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 0; background: #f9f9f9; }
+    header { background: #1a73e8; color: white; padding: 1rem; text-align: center; }
+    .tabs { display: flex; justify-content: center; background: #ececec; flex-wrap: wrap; }
+    .tab { padding: 0.8rem 1.2rem; cursor: pointer; }
+    .tab.active { background: #1a73e8; color: white; font-weight: bold; }
+    .content { display: none; padding: 1rem; }
+    .content.active { display: block; }
+    .restaurant { margin-bottom: 1rem; border: 1px solid #ccc; border-radius: 8px; background: white; }
+    .restaurant h2 { margin: 0; padding: 0.8rem 1rem; background: #f0f0f0; cursor: pointer; }
+    .menu-section { display: none; padding: 0 1rem 1rem; }
+    .menu-item { margin-bottom: 0.5rem; }
+    .price { font-weight: bold; color: #1a73e8; }
+    .emoji { margin-left: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>연세대학교 주간 학식 식단표</h1>
+  </header>
+  <div class="tabs" id="dayTabs">
+    <div class="tab active" data-day="mon">월</div>
+    <div class="tab" data-day="tue">화</div>
+    <div class="tab" data-day="wed">수</div>
+    <div class="tab" data-day="thu">목</div>
+    <div class="tab" data-day="fri">금</div>
+    <div class="tab" data-day="sat">토</div>
+  </div>
+  <div id="contentArea"></div>
+
+  <script>
+    const emojiRules = [
+      { emoji: "🐖", keywords: ["돼지고기", "돼지", "pork", "스팸", "불고기", "햄버그"] },
+      { emoji: "🐄", keywords: ["소고기", "쇠고기", "beef"] },
+      { emoji: "🐟", keywords: ["생선", "고등어", "fish", "mackerel"] },
+      { emoji: "🥚", keywords: ["달걀", "계란", "egg"] }
+    ];
+
+    function getEmoji(text) {
+      text = text.toLowerCase();
+      for (const rule of emojiRules) {
+        for (const word of rule.keywords) {
+          if (text.includes(word)) {
+            return ` <span class="emoji">${rule.emoji}</span>`;
+          }
+        }
+      }
+      return "";
+    }
+
+    const data = {
+      mon: [
+        {
+          name: "맛나샘",
+          menus: [
+            { item: "쇠고기영양탕", roman: "Soegogi Yeongyangtang", eng: "Beef Nutrient Soup", price: "5800" },
+            { item: "순두부찌개", roman: "Soondubu Jjigae", eng: "Soft Tofu Stew", price: "5000" }
+          ]
+        },
+        {
+          name: "한경관",
+          menus: [
+            { item: "소고기만두전골", roman: "Sogogi Mandu Jeongol", eng: "Beef Dumpling Hot Pot", price: "7500" }
+          ]
+        },
+        {
+          name: "부를샘",
+          menus: [
+            { item: "볶음자장면", roman: "Bokkeum Jjajangmyeon", eng: "Stir-fried Black Bean Noodles", price: "7000" },
+            { item: "부패 & 순대야채볶음", roman: "Buffet & Sundae Yachae Bokkeum", eng: "Buffet & Stir-fried Blood Sausage with Veggies", price: "10000" }
+          ]
+        }
+      ],
+      tue: [
+        {
+          name: "맛나샘",
+          menus: [
+            { item: "사골떡만둣국", roman: "Sagol Tteok Mandu Guk", eng: "Beef Bone Rice Cake Dumpling Soup", price: "5300" },
+            { item: "짜장밥 & 계란후라이", roman: "Jjajangbap & Gyeran Fry", eng: "Black Bean Sauce Rice & Fried Egg", price: "5000" }
+          ]
+        },
+        {
+          name: "한경관",
+          menus: [
+            { item: "치즈돈까스", roman: "Cheese Donkkaseu", eng: "Cheese Pork Cutlet", price: "7000" }
+          ]
+        },
+        {
+          name: "부를샘",
+          menus: [
+            { item: "훈제오리덮밥", roman: "Hunje O-ri Deopbap", eng: "Smoked Duck Rice Bowl", price: "8000" },
+            { item: "두부김치", roman: "Dubu Kimchi", eng: "Tofu with Stir-fried Kimchi", price: "6500" }
+          ]
+        }
+      ],
+      wed: [
+        {
+          name: "맛나샘",
+          menus: [
+            { item: "고등어조림", roman: "Godeungeo Jorim", eng: "Braised Mackerel", price: "5500" },
+            { item: "계란말이덮밥", roman: "Gyeranmari Deopbap", eng: "Rolled Omelet Rice Bowl", price: "5200" }
+          ]
+        },
+        {
+          name: "한경관",
+          menus: [
+            { item: "나가사키짬뽕", roman: "Nagasaki Jjamppong", eng: "Nagasaki Seafood Noodle Soup", price: "7300" }
+          ]
+        },
+        {
+          name: "부를샘",
+          menus: [
+            { item: "버섯불고기정식", roman: "Beoseot Bulgogi Jeongsik", eng: "Mushroom Bulgogi Set", price: "7500" }
+          ]
+        }
+      ],
+      thu: [
+        {
+          name: "맛나샘",
+          menus: [
+            { item: "철판제육볶음", roman: "Cheolpan Jeyuk Bokkeum", eng: "Iron Plate Pork Stir-fry", price: "5500" },
+            { item: "김치찌개 & 계란찜", roman: "Kimchi Jjigae & Gyeran Jjim", eng: "Kimchi Stew & Steamed Egg", price: "5200" }
+          ]
+        },
+        {
+          name: "한경관",
+          menus: [
+            { item: "햄버그스테이크", roman: "Hamburg Steak", eng: "Hamburg-style Steak", price: "7300" }
+          ]
+        },
+        {
+          name: "부를샘",
+          menus: [
+            { item: "돈코츠라멘", roman: "Donkotsu Ramen", eng: "Tonkotsu Ramen (Pork Broth)", price: "8500" }
+          ]
+        }
+      ],
+      fri: [
+        {
+          name: "맛나샘",
+          menus: [
+            { item: "스팸마요덮밥", roman: "Spam Mayo Deopbap", eng: "Spam Mayo Rice Bowl", price: "5300" },
+            { item: "소고기우동", roman: "Sogogi Udon", eng: "Beef Udon Noodle Soup", price: "5500" }
+          ]
+        },
+        {
+          name: "한경관",
+          menus: [
+            { item: "불고기버거", roman: "Bulgogi Burger", eng: "Korean BBQ Burger", price: "6700" }
+          ]
+        },
+        {
+          name: "부를샘",
+          menus: [
+            { item: "김치볶음밥 & 계란프라이", roman: "Kimchi Bokkeumbap & Gyeran Fry", eng: "Kimchi Fried Rice & Fried Egg", price: "7200" }
+          ]
+        }
+      ],
+      sat: [
+        {
+          name: "맛나샘",
+          menus: [
+            { item: "참치김치찌개", roman: "Chamchi Kimchi Jjigae", eng: "Tuna Kimchi Stew", price: "5300" },
+            { item: "계란덮밥", roman: "Gyeran Deopbap", eng: "Egg Rice Bowl", price: "4800" }
+          ]
+        }
+      ]
+    };
+
+    const contentArea = document.getElementById('contentArea');
+
+    Object.keys(data).forEach(day => {
+      const container = document.createElement('div');
+      container.className = `content ${day === 'mon' ? 'active' : ''}`;
+      container.id = `content-${day}`;
+      data[day].forEach(res => {
+        const r = document.createElement('div');
+        r.className = 'restaurant';
+        const h = document.createElement('h2');
+        h.textContent = res.name;
+        const section = document.createElement('div');
+        section.className = 'menu-section';
+        res.menus.forEach(m => {
+          const item = document.createElement('div');
+          item.className = 'menu-item';
+          const emoji = getEmoji(`${m.item} ${m.roman} ${m.eng}`);
+          item.innerHTML = `
+            <strong>${m.item}</strong>${emoji}<br>
+            ${m.roman}<br>
+            ${m.eng}<br>
+            <span class="price">₩${m.price}</span>
+          `;
+          section.appendChild(item);
+        });
+        h.onclick = () => {
+          section.style.display = section.style.display === 'block' ? 'none' : 'block';
+        };
+        r.appendChild(h);
+        r.appendChild(section);
+        container.appendChild(r);
+      });
+      contentArea.appendChild(container);
+    });
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.onclick = () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(`content-${tab.dataset.day}`).classList.add('active');
+      };
+    });
+  </script>
+</body>
+</html>
